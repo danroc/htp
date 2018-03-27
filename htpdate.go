@@ -6,17 +6,31 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httptrace"
 	"time"
 )
 
 func timeDiff(url string) (float64, float64, error) {
-	t0 := time.Now()
-	resp, err := http.Head(url)
-	delta := time.Since(t0).Seconds()
+	var delta float64
+	var t0 time.Time
+	trace := &httptrace.ClientTrace{
+		WroteRequest: func(info httptrace.WroteRequestInfo) {
+			t0 = time.Now()
+		},
+		GotFirstResponseByte: func() {
+			delta = time.Since(t0).Seconds()
+		},
+	}
+
+	req, err := http.NewRequest(http.MethodHead, url, nil)
 	if err != nil {
 		return 0, 0, err
 	}
-
+	ctx := httptrace.WithClientTrace(req.Context(), trace)
+	resp, err := http.DefaultClient.Do(req.WithContext(ctx))
+	if err != nil {
+		return 0, 0, err
+	}
 	date := resp.Header.Get("Date")
 	if date == "" {
 		return 0, 0, errors.New("Date header is missing")
