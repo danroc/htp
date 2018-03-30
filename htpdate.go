@@ -31,7 +31,6 @@ func timeDiff(url string) (float64, float64, error) {
 	if err != nil {
 		return 0, 0, err
 	}
-
 	date := resp.Header.Get("Date")
 	if date == "" {
 		return 0, 0, errors.New("Date header is missing")
