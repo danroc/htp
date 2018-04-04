@@ -58,5 +58,6 @@ func main() {
 		sumT += theta / delta
 		sumD += 1 / delta
 	}
-	fmt.Printf("offset %.5f sec\n", sumT/sumD)
+	offset := time.Duration(1e9 * sumT / sumD)
+	fmt.Println(time.Now().Add(offset).Format(time.RFC3339Nano))
 }
