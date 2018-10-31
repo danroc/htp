@@ -23,9 +23,6 @@ func main() {
 			log.Fatal(err)
 		}
 		date := resp.Header.Get("Date")
-		if date == "" {
-			log.Fatal("Date header is missing")
-		}
 		t2, err := time.Parse(time.RFC1123, date)
 		if err != nil {
 			log.Fatal(err)
