@@ -10,14 +10,15 @@ import (
 )
 
 func main() {
-	n := flag.Uint("n", 12, "Number of requests")
-	h := flag.String("u", "https://www.google.com", "Host URL")
+	url := flag.String("u", "https://www.google.com", "Host URL")
+	count := flag.Uint("n", 12, "Number of requests")
+	quiet := flag.Bool("q", false, "Do not output time offset")
 	flag.Parse()
 
 	lo, hi := math.Inf(-1), math.Inf(+1)
-	for i := uint(0); i < *n; i++ {
+	for i := uint(0); i < *count; i++ {
 		t0 := time.Now()
-		resp, err := http.Head(*h)
+		resp, err := http.Head(*url)
 		t1 := time.Now()
 		if err != nil {
 			log.Fatal(err)
@@ -44,5 +45,7 @@ func main() {
 		Format(time.RFC3339Nano)
 
 	fmt.Printf("%s\n", now)
-	fmt.Printf("offset: %.3f (± %.3f) sec.\n", offset, margin)
+	if !*quiet {
+		fmt.Printf("offset: %.3f (± %.3f) sec\n", offset, margin)
+	}
 }
