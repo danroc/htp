@@ -37,5 +37,12 @@ func main() {
 		lo = math.Max(lo, d0-1)
 		hi = math.Min(hi, d1)
 	}
-	fmt.Println((hi + lo) / 2)
+	offset := (hi + lo) / 2
+	margin := (hi - lo) / 2
+	now := time.Now().
+		Add(time.Duration(-offset * 1e9)).
+		Format(time.RFC3339Nano)
+
+	fmt.Printf("%s\n", now)
+	fmt.Printf("offset: %.3f (± %.3f) sec.\n", offset, margin)
 }
