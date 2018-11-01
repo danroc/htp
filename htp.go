@@ -11,7 +11,7 @@ import (
 
 func main() {
 	n := flag.Uint("n", 12, "Number of requests")
-	h := flag.String("u", "https://google.com", "Host URL")
+	h := flag.String("u", "https://www.google.com", "Host URL")
 	flag.Parse()
 
 	lo, hi := math.Inf(-1), math.Inf(+1)
@@ -22,6 +22,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		resp.Body.Close()
 		date := resp.Header.Get("Date")
 		t2, err := time.Parse(time.RFC1123, date)
 		if err != nil {
