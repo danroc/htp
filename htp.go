@@ -22,6 +22,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		resp.Body.Close()
 		date := resp.Header.Get("Date")
 		t2, err := time.Parse(time.RFC1123, date)
