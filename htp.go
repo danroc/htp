@@ -9,43 +9,75 @@ import (
 	"time"
 )
 
+// Constants from "time" package but with the int64 type.
+const (
+	Nanosecond  int64 = 1
+	Microsecond       = 1000 * Nanosecond
+	Millisecond       = 1000 * Microsecond
+	Second            = 1000 * Millisecond
+)
+
 func main() {
-	url := flag.String("u", "https://www.google.com", "Host URL")
-	count := flag.Uint("n", 12, "Number of requests")
+	host := flag.String("u", "https://www.google.com", "Host URL")
+	count := flag.Uint("n", 8, "Number of requests")
 	quiet := flag.Bool("q", false, "Do not output time offset")
 	flag.Parse()
 
-	lo, hi := math.Inf(-1), math.Inf(+1)
+	var (
+		offset int64
+		lo     int64 = math.MinInt64
+		hi     int64 = math.MaxInt64
+	)
 	for i := uint(0); i < *count; i++ {
-		t0 := time.Now()
-		resp, err := http.Head(*url)
-		t1 := time.Now()
+		t0 := time.Now().UnixNano()
+		resp, err := http.Head(*host)
+		t1 := time.Now().UnixNano()
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		resp.Body.Close()
-		date := resp.Header.Get("Date")
-		t2, err := time.Parse(time.RFC1123, date)
+		dateStr := resp.Header.Get("Date")
+		date, err := time.Parse(time.RFC1123, dateStr)
 		if err != nil {
 			log.Fatal(err)
 		}
+		t2 := date.UnixNano()
 
-		u2 := t2.UnixNano()
-		d0 := float64(t0.UnixNano()-u2) / 1e9
-		d1 := float64(t1.UnixNano()-u2) / 1e9
+		lo = max(lo, t0-t2-Second)
+		hi = min(hi, t1-t2)
+		offset = (hi + lo) / 2
 
-		lo = math.Max(lo, d0-1)
-		hi = math.Min(hi, d1)
+		sleep := offset - (t1-t0)/2 - t1%Second
+		for sleep < 0 {
+			sleep += Second
+		}
+		for sleep > Second {
+			sleep -= Second
+		}
+		time.Sleep(time.Duration(sleep))
 	}
-	offset := (hi + lo) / 2
-	margin := (hi - lo) / 2
-	now := time.Now().
-		Add(time.Duration(-offset * 1e9)).
-		Format(time.RFC3339Nano)
 
-	fmt.Printf("%s\n", now)
+	now := time.Now().Add(time.Duration(-offset))
+	fmt.Printf("%s\n", now.Format(time.RFC3339Nano))
 	if !*quiet {
-		fmt.Printf("offset: %.3f (± %.3f) sec\n", offset, margin)
+		margin := (hi - lo) / 2
+		fmt.Printf("offset: %.3f (± %.3f) sec\n",
+			float64(offset)/float64(Second),
+			float64(margin)/float64(Second))
 	}
+}
+
+func min(a, b int64) int64 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int64) int64 {
+	if a > b {
+		return a
+	}
+	return b
 }
