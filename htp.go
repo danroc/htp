@@ -18,10 +18,12 @@ const (
 )
 
 func main() {
-	host := flag.String("u", "https://www.google.com", "Host URL")
+	host := flag.String("u", "https://google.com", "Host URL")
 	count := flag.Uint("n", 8, "Number of requests")
 	quiet := flag.Bool("q", false, "Do not output time offset")
 	flag.Parse()
+
+	http.DefaultClient.CheckRedirect = noRedirect
 
 	var (
 		offset int64
@@ -80,4 +82,8 @@ func max(a, b int64) int64 {
 		return a
 	}
 	return b
+}
+
+func noRedirect(req *http.Request, via []*http.Request) error {
+	return http.ErrUseLastResponse
 }
