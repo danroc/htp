@@ -66,7 +66,7 @@ func main() {
 	fmt.Printf("%s\n", now.Format(time.RFC3339Nano))
 	if !*quiet {
 		margin := (hi - lo) / 2
-		logger.Printf("offset: %.3f (± %.3f) sec\n",
+		logger.Printf("offset: %.3f (± %.3f) seconds\n",
 			float64(offset)/float64(Second),
 			float64(margin)/float64(Second))
 	}
