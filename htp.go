@@ -29,13 +29,17 @@ func main() {
 
 	var (
 		offset int64
+		sleep  int64 = 0
 		lo     int64 = math.MinInt64
 		hi     int64 = math.MaxInt64
 	)
 	for i := uint(0); i < *count; i++ {
+		time.Sleep(time.Duration(sleep))
+
 		t0 := time.Now().UnixNano()
 		resp, err := http.Head(*host)
 		t1 := time.Now().UnixNano()
+
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -51,25 +55,24 @@ func main() {
 		lo = max(lo, t0-t2-Second)
 		hi = min(hi, t1-t2)
 		offset = (hi + lo) / 2
+		if !*quiet {
+			margin := (hi - lo) / 2
+			logger.Printf("offset: %+.3f (±%.3f) seconds\n",
+				float64(offset)/float64(Second),
+				float64(margin)/float64(Second))
+		}
 
-		sleep := offset - (t1-t0)/2 - t1%Second
+		sleep = offset - (t1-t0)/2 - t1%Second
 		for sleep < 0 {
 			sleep += Second
 		}
 		for sleep > Second {
 			sleep -= Second
 		}
-		time.Sleep(time.Duration(sleep))
 	}
 
 	now := time.Now().Add(time.Duration(-offset))
 	fmt.Printf("%s\n", now.Format(time.RFC3339Nano))
-	if !*quiet {
-		margin := (hi - lo) / 2
-		logger.Printf("offset: %.3f (± %.3f) seconds\n",
-			float64(offset)/float64(Second),
-			float64(margin)/float64(Second))
-	}
 }
 
 func min(a, b int64) int64 {
