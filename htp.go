@@ -6,6 +6,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -23,6 +24,7 @@ func main() {
 	quiet := flag.Bool("q", false, "Do not output time offset")
 	flag.Parse()
 
+	logger := log.New(os.Stderr, "", 0)
 	http.DefaultClient.CheckRedirect = noRedirect
 
 	var (
@@ -37,12 +39,12 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		resp.Body.Close()
+
 		dateStr := resp.Header.Get("Date")
 		date, err := time.Parse(time.RFC1123, dateStr)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatalf("Invalid HTTP response date: \"%s\"", dateStr)
 		}
 		t2 := date.UnixNano()
 
@@ -64,7 +66,7 @@ func main() {
 	fmt.Printf("%s\n", now.Format(time.RFC3339Nano))
 	if !*quiet {
 		margin := (hi - lo) / 2
-		fmt.Printf("offset: %.3f (± %.3f) sec\n",
+		logger.Printf("offset: %.3f (± %.3f) sec\n",
 			float64(offset)/float64(Second),
 			float64(margin)/float64(Second))
 	}
