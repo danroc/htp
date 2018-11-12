@@ -41,7 +41,7 @@ func main() {
 		t1 := time.Now().UnixNano()
 
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 		resp.Body.Close()
 
