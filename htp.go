@@ -63,12 +63,7 @@ func main() {
 		}
 
 		sleep = offset - (t1-t0)/2 - t1%Second
-		for sleep < 0 {
-			sleep += Second
-		}
-		for sleep > Second {
-			sleep -= Second
-		}
+		sleep = mod(sleep, Second)
 	}
 
 	now := time.Now().Add(time.Duration(-offset))
@@ -87,6 +82,10 @@ func max(a, b int64) int64 {
 		return a
 	}
 	return b
+}
+
+func mod(x, m int64) int64 {
+	return (m + x%m) % m
 }
 
 func noRedirect(req *http.Request, via []*http.Request) error {
