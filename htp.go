@@ -18,11 +18,13 @@ const (
 	Second            = 1000 * Millisecond
 )
 
+const UnixDateMilli = "Mon Jan _2 15:04:05.000 MST 2006"
+
 func main() {
 	host := flag.String("u", "https://google.com", "Host URL")
 	count := flag.Uint("n", 8, "Number of requests")
 	quiet := flag.Bool("q", false, "Do not output time offset")
-	layout := flag.String("f", time.RFC3339Nano, "Time layout")
+	layout := flag.String("f", UnixDateMilli, "Time format layout")
 	flag.Parse()
 
 	logger := log.New(os.Stderr, "", 0)
