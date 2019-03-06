@@ -22,6 +22,7 @@ func main() {
 	host := flag.String("u", "https://google.com", "Host URL")
 	count := flag.Uint("n", 8, "Number of requests")
 	quiet := flag.Bool("q", false, "Do not output time offset")
+	layout := flag.String("f", time.RFC3339Nano, "Time layout")
 	flag.Parse()
 
 	logger := log.New(os.Stderr, "", 0)
@@ -68,7 +69,7 @@ func main() {
 	}
 
 	now := time.Now().Add(time.Duration(-offset))
-	fmt.Printf("%s\n", now.Format(time.RFC3339Nano))
+	fmt.Printf("%s\n", now.Format(*layout))
 }
 
 func min(a, b int64) int64 {
