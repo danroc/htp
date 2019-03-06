@@ -26,6 +26,7 @@ func main() {
 
 	logger := log.New(os.Stderr, "", 0)
 	http.DefaultClient.CheckRedirect = noRedirect
+	http.DefaultClient.Timeout = 10 * time.Second
 
 	var (
 		offset int64
