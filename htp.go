@@ -31,6 +31,12 @@ func main() {
 	http.DefaultClient.CheckRedirect = noRedirect
 	http.DefaultClient.Timeout = 10 * time.Second
 
+	req, err := http.NewRequest("HEAD", *host, nil)
+	if err != nil {
+		logger.Fatal("Invalid HTTP request: ", err)
+	}
+	req.Header.Add("Cache-Control", "no-cache")
+
 	var (
 		offset int64
 		sleep  int64 = 0
@@ -41,18 +47,18 @@ func main() {
 		time.Sleep(time.Duration(sleep))
 
 		t0 := time.Now().UnixNano()
-		resp, err := http.Head(*host)
+		resp, err := http.DefaultClient.Do(req)
 		t1 := time.Now().UnixNano()
 
 		if err != nil {
-			logger.Fatal(err)
+			logger.Fatal("Invalid HTTP response: ", err)
 		}
 		resp.Body.Close()
 
 		dateStr := resp.Header.Get("Date")
 		date, err := time.Parse(time.RFC1123, dateStr)
 		if err != nil {
-			logger.Fatalf("Invalid HTTP response date: \"%s\"", dateStr)
+			logger.Fatal("Invalid HTTP response date: ", err)
 		}
 		t2 := date.UnixNano()
 
