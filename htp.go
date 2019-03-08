@@ -22,7 +22,7 @@ const UnixDateMilli = "Mon Jan _2 15:04:05.000 MST 2006"
 
 func main() {
 	host := flag.String("u", "https://google.com", "Host URL")
-	count := flag.Uint("n", 12, "Number of requests")
+	count := flag.Uint("n", 8, "Number of requests")
 	quiet := flag.Bool("q", false, "Do not output time offsets")
 	layout := flag.String("f", UnixDateMilli, "Time format layout")
 	flag.Parse()
