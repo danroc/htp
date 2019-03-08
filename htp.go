@@ -66,7 +66,7 @@ func main() {
 		hi = min(hi, t1-t2)
 		if hi < lo {
 			logger.Fatal("Cannot synchronize clocks: " +
-				"Local or remote time changed during synchronization")
+				"Local or remote clock changed during synchronization")
 		}
 
 		offset = (hi + lo) / 2
