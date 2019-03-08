@@ -64,6 +64,10 @@ func main() {
 
 		lo = max(lo, t0-t2-Second)
 		hi = min(hi, t1-t2)
+		if hi < lo {
+			logger.Fatal("Server time changed during syncronization")
+		}
+
 		offset = (hi + lo) / 2
 		if !*quiet {
 			margin := (hi - lo) / 2
