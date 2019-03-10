@@ -6,6 +6,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"net/http/httptrace"
 	"os"
 	"time"
 )
@@ -28,8 +29,9 @@ func main() {
 	flag.Parse()
 
 	logger := log.New(os.Stderr, "", 0)
-	http.DefaultClient.CheckRedirect = noRedirect
-	http.DefaultClient.Timeout = 10 * time.Second
+	client := http.DefaultClient
+	client.CheckRedirect = noRedirect
+	client.Timeout = 10 * time.Second
 
 	req, err := http.NewRequest("HEAD", *host, nil)
 	if err != nil {
@@ -38,18 +40,28 @@ func main() {
 	req.Header.Add("Cache-Control", "no-cache")
 
 	var (
+		t0, t1 int64
 		offset int64
 		sleep  int64 = 0
 		lo     int64 = math.MinInt64
 		hi     int64 = math.MaxInt64
 	)
+
+	ctx := httptrace.WithClientTrace(req.Context(),
+		&httptrace.ClientTrace{
+			WroteRequest: func(info httptrace.WroteRequestInfo) {
+				t0 = time.Now().UnixNano()
+			},
+			GotFirstResponseByte: func() {
+				t1 = time.Now().UnixNano()
+			},
+		},
+	)
+
 	for i := uint(0); i < *count; i++ {
 		time.Sleep(time.Duration(sleep))
 
-		t0 := time.Now().UnixNano()
-		resp, err := http.DefaultClient.Do(req)
-		t1 := time.Now().UnixNano()
-
+		resp, err := client.Do(req.WithContext(ctx))
 		if err != nil {
 			logger.Fatal("Invalid HTTP response: ", err)
 		}
