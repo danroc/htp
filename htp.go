@@ -112,7 +112,11 @@ func max(a, b int64) int64 {
 }
 
 func mod(x, m int64) int64 {
-	return (m + x%m) % m
+	y := x % m
+	if y >= 0 {
+		return y
+	}
+	return m + y
 }
 
 func noRedirect(req *http.Request, via []*http.Request) error {
