@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptrace"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -27,6 +28,10 @@ func main() {
 	quiet := flag.Bool("q", false, "Do not output time offsets")
 	layout := flag.String("f", UnixDateMilli, "Time format layout")
 	flag.Parse()
+
+	if strings.Index(*host, "://") == -1 {
+		*host = "http://" + *host
+	}
 
 	logger := log.New(os.Stderr, "", 0)
 	client := http.DefaultClient
