@@ -20,7 +20,7 @@ const (
 	Second            = 1000 * Millisecond
 )
 
-const UnixDateMilli = "Mon Jan _2 15:04:05.000 MST 2006"
+const UnixDateMilli = "02 Jan 2006 15:04:05.000 MST"
 
 func main() {
 	host := flag.String("u", "https://google.com", "Host URL")
