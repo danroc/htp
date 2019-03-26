@@ -25,7 +25,8 @@ const UnixDateMilli = "02 Jan 2006 15:04:05.000 MST"
 func main() {
 	host := flag.String("u", "https://google.com", "Host URL")
 	count := flag.Uint("n", 8, "Number of requests")
-	quiet := flag.Bool("q", false, "Do not output time offsets")
+	quiet := flag.Bool("q", false, "Quiet mode (don't output offsets)")
+	adjust := flag.Bool("a", false, "Output offset to adjust time")
 	layout := flag.String("f", UnixDateMilli, "Time format layout")
 	flag.Parse()
 
@@ -90,16 +91,23 @@ func main() {
 		if !*quiet {
 			margin := (hi - lo) / 2
 			logger.Printf("offset: %+.3f (±%.3f) seconds\n",
-				float64(offset)/float64(Second),
-				float64(margin)/float64(Second))
+				toSec(offset), toSec(margin))
 		}
 
 		sleep = offset - (t1-t0)/2 - t1%Second
 		sleep = mod(sleep, Second)
 	}
 
-	now := time.Now().Add(time.Duration(-offset))
-	fmt.Printf("%s\n", now.Format(*layout))
+	if *adjust {
+		fmt.Printf("%+.3f seconds\n", toSec(-offset))
+	} else {
+		now := time.Now().Add(time.Duration(-offset))
+		fmt.Printf("%s\n", now.Format(*layout))
+	}
+}
+
+func toSec(t int64) float64 {
+	return float64(t) / float64(Second)
 }
 
 func min(a, b int64) int64 {
