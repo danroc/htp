@@ -27,7 +27,7 @@ func main() {
 	count := flag.Uint("n", 8, "Number of requests")
 	verbose := flag.Bool("v", false, "Verbose mode (display offsets)")
 	showDate := flag.Bool("d", false, "Display date and time instead of offset")
-	dateLayout := flag.String("f", unixDateMilli, "Time format layout")
+	dateLayout := flag.String("f", unixDateMilli, "Date and time format")
 	flag.Parse()
 
 	if strings.Index(*host, "://") == -1 {
