@@ -22,16 +22,18 @@ const (
 
 const unixDateMilli = "02 Jan 2006 15:04:05.000 MST"
 
-func main() {
-	host := flag.String("u", "https://google.com", "Host URL")
-	count := flag.Uint("n", 8, "Number of requests")
-	verbose := flag.Bool("v", false, "Verbose mode (display offsets)")
-	showDate := flag.Bool("d", false, "Display date and time instead of offset")
-	dateLayout := flag.String("f", unixDateMilli, "Date and time format")
-	flag.Parse()
+type options struct {
+	host    string
+	count   uint
+	verbose bool
+	date    bool
+	layout  string
+}
 
-	if strings.Index(*host, "://") == -1 {
-		*host = "http://" + *host
+func main() {
+	opts := parseArgs()
+	if strings.Index(opts.host, "://") == -1 {
+		opts.host = "http://" + opts.host
 	}
 
 	logger := log.New(os.Stderr, "", 0)
@@ -39,7 +41,7 @@ func main() {
 	client.CheckRedirect = noRedirect
 	client.Timeout = 10 * time.Second
 
-	req, err := http.NewRequest("HEAD", *host, nil)
+	req, err := http.NewRequest("HEAD", opts.host, nil)
 	if err != nil {
 		logger.Fatal("Invalid HTTP request: ", err)
 	}
@@ -64,7 +66,7 @@ func main() {
 		},
 	)
 
-	for i := uint(0); i < *count; i++ {
+	for i := uint(0); i < opts.count; i++ {
 		time.Sleep(time.Duration(sleep))
 
 		resp, err := client.Do(req.WithContext(ctx))
@@ -88,7 +90,7 @@ func main() {
 		}
 
 		offset = (hi + lo) / 2
-		if *verbose {
+		if opts.verbose {
 			margin := (hi - lo) / 2
 			logger.Printf("offset: %+.3f (±%.3f) seconds\n",
 				toSec(offset), toSec(margin))
@@ -98,12 +100,30 @@ func main() {
 		sleep = mod(sleep, Second)
 	}
 
-	if *showDate {
+	if opts.date {
 		now := time.Now().Add(time.Duration(-offset))
-		fmt.Printf("%s\n", now.Format(*dateLayout))
+		fmt.Printf("%s\n", now.Format(opts.layout))
 	} else {
 		fmt.Printf("%+.3f seconds\n", toSec(-offset))
 	}
+}
+
+func parseArgs() *options {
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(),
+			"HTP - Date and time from HTTP headers\n\nUsage:\n")
+		flag.PrintDefaults()
+	}
+
+	opts := options{}
+	flag.StringVar(&opts.host, "u", "https://google.com", "Host URL")
+	flag.UintVar(&opts.count, "n", 8, "Number of requests")
+	flag.BoolVar(&opts.verbose, "v", false, "Show offsets during synchronization")
+	flag.BoolVar(&opts.date, "d", false, "Display date and time instead of offset")
+	flag.StringVar(&opts.layout, "f", unixDateMilli, "Date and time format")
+	flag.Parse()
+
+	return &opts
 }
 
 func toSec(t int64) float64 {
