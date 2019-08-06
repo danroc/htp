@@ -104,7 +104,7 @@ func main() {
 		now := time.Now().Add(time.Duration(-offset))
 		fmt.Printf("%s\n", now.Format(opts.layout))
 	} else {
-		fmt.Printf("%+.3f seconds\n", toSec(-offset))
+		fmt.Printf("%+.3f\n", toSec(-offset))
 	}
 }
 
