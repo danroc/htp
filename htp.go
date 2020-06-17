@@ -12,14 +12,7 @@ import (
 	"time"
 )
 
-// Constants from "time" package but with the int64 type.
-const (
-	Nanosecond  int64 = 1
-	Microsecond       = 1000 * Nanosecond
-	Millisecond       = 1000 * Microsecond
-	Second            = 1000 * Millisecond
-)
-
+const second = int64(time.Second)
 const unixDateMilli = "02 Jan 2006 15:04:05.000 MST"
 
 type options struct {
@@ -82,7 +75,7 @@ func main() {
 		}
 		t2 := date.UnixNano()
 
-		lo = max(lo, t0-t2-Second)
+		lo = max(lo, t0-t2-second)
 		hi = min(hi, t1-t2)
 		if hi < lo {
 			logger.Fatal("Cannot synchronize clocks: " +
@@ -96,8 +89,8 @@ func main() {
 				toSec(offset), toSec(margin))
 		}
 
-		sleep = offset - (t1-t0)/2 - t1%Second
-		sleep = mod(sleep, Second)
+		sleep = offset - (t1-t0)/2 - t1%second
+		sleep = mod(sleep, second)
 	}
 
 	if opts.date {
@@ -127,7 +120,7 @@ func parseArgs() *options {
 }
 
 func toSec(t int64) float64 {
-	return float64(t) / float64(Second)
+	return float64(t) / float64(second)
 }
 
 func min(a, b int64) int64 {
