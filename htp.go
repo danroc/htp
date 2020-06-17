@@ -30,15 +30,16 @@ func main() {
 	}
 
 	logger := log.New(os.Stderr, "", 0)
-	client := http.DefaultClient
-	client.CheckRedirect = noRedirect
+	client := &http.Client{}
 	client.Timeout = 10 * time.Second
+	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
 
 	req, err := http.NewRequest("HEAD", opts.host, nil)
 	if err != nil {
 		logger.Fatal("Invalid HTTP request: ", err)
 	}
-	req.Header.Add("Cache-Control", "no-cache")
 
 	var (
 		t0, t1 int64
@@ -143,8 +144,4 @@ func mod(x, m int64) int64 {
 		return y
 	}
 	return m + y
-}
-
-func noRedirect(req *http.Request, via []*http.Request) error {
-	return http.ErrUseLastResponse
 }
