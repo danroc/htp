@@ -26,7 +26,7 @@ type options struct {
 func main() {
 	opts := parseArgs()
 	if strings.Index(opts.host, "://") == -1 {
-		opts.host = "http://" + opts.host
+		opts.host = "https://" + opts.host
 	}
 
 	logger := log.New(os.Stderr, "", 0)
