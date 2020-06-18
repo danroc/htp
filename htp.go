@@ -42,7 +42,7 @@ func main() {
 	}
 
 	var (
-		t0, t1 int64
+		t0, t2 int64
 		offset int64
 		sleep  int64
 		lo     int64 = math.MinInt64
@@ -55,7 +55,7 @@ func main() {
 				t0 = time.Now().UnixNano()
 			},
 			GotFirstResponseByte: func() {
-				t1 = time.Now().UnixNano()
+				t2 = time.Now().UnixNano()
 			},
 		},
 	)
@@ -74,10 +74,10 @@ func main() {
 		if err != nil {
 			logger.Fatal("Invalid HTTP response date: ", err)
 		}
-		t2 := date.UnixNano()
+		t1 := date.UnixNano()
 
-		lo = max(lo, t0-t2-second)
-		hi = min(hi, t1-t2)
+		lo = max(lo, t0-t1-second)
+		hi = min(hi, t2-t1)
 		if hi < lo {
 			logger.Fatal("Cannot synchronize clocks: " +
 				"Local or remote clock changed during synchronization")
@@ -90,7 +90,7 @@ func main() {
 				toSec(offset), toSec(margin))
 		}
 
-		sleep = offset - (t1-t0)/2 - t1%second
+		sleep = offset - (t2-t0)/2 - t2%second
 		sleep = mod(sleep, second)
 	}
 
