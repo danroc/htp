@@ -90,7 +90,7 @@ func main() {
 				toSec(offset), toSec(margin))
 		}
 
-		sleep = offset - (t2-t0)/2 - t2%second
+		sleep = offset - (t2-t0)/2 - t2
 		sleep = mod(sleep, second)
 	}
 
