@@ -30,7 +30,7 @@ So,
 But we must use _⌊t₁⌋_ instead of _t₁_ in our calculations because it
 is the only time information present in the HTTP response header.
 
-Since _t₁ ∈ [⌊t₁⌋, ⌊t₁⌋ + 1)_:
+Since _t₁ ∈ [⌊t₁⌋, ⌊t₁⌋ + 1)_, then:
 
 * θ > t₀ - ⌊t₁⌋ - 1
 * θ < t₂ - ⌊t₁⌋
@@ -38,14 +38,14 @@ Since _t₁ ∈ [⌊t₁⌋, ⌊t₁⌋ + 1)_:
 Observe that the closer _t₁_ is to _⌊t₁⌋_ or _⌊t₁⌋ + 1_, smaller is the
 error in the second or first equation above, respectively.
 
-We can repeat the above procedure to improve our estimate of _θ_.
+We can repeat the above procedure to improve our estimate of _θ_:
 
 * θ⁻ = MAX(θ⁻, t₀ - ⌊t₁⌋ - 1)
 * θ⁺ = MIN(θ⁺, t₂ - ⌊t₁⌋)
 * θ = (θ⁺ + θ⁻)/2
 
-The ideal delay _d_ before sending the next request is calculated so
-that the next value of _t₁_ is close to a "full" second:
+The ideal delay _d_ to wait before sending the next request is
+calculated so that the next value of _t₁_ is close to a "full" second:
 
 t₂ + d + (t₂ - t₀)/2 - θ = ⌊t₁⌋ + k, k ∈ ℤ
 
