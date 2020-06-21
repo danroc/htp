@@ -45,5 +45,12 @@ t₂ + d + (t₂ - t₀)/2 - θ = ⌊t₁⌋ + k, k ∈ ℤ
 
 ⇒ d = θ - t₂ - (t₂ - t₀)/2 mod 1
 
-**Note**: The _- θ_ term in the first equation above converts from
-local to remote time.
+Observe that:
+
+- The _- θ_ term in the first equation above converts from local to
+  remote time.
+
+- The _(t₂ - t₀)_ is an estimation of the round-trip time (RTT).
+
+- We suppose that both the request and the response take half-RTT to go
+  from the sender to the receiver.
