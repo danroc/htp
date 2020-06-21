@@ -44,3 +44,6 @@ t₂ + d + (t₂ - t₀)/2 - θ = ⌊t₁⌋ + k, k ∈ ℤ
 ⇒ d = ⌊t₁⌋ + k + θ - t₂ - (t₂ - t₀)/2 mod 1
 
 ⇒ d = θ - t₂ - (t₂ - t₀)/2 mod 1
+
+**Note**: The _- θ_ term in the first equation above converts from
+local to remote time.
