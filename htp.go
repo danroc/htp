@@ -110,7 +110,7 @@ func parseArgs() *options {
 	}
 
 	opts := options{}
-	flag.StringVar(&opts.host, "u", "https://google.com", "Host URL")
+	flag.StringVar(&opts.host, "u", "https://www.google.com", "Host URL")
 	flag.UintVar(&opts.count, "n", 8, "Number of requests")
 	flag.BoolVar(&opts.verbose, "v", false, "Show offsets during synchronization")
 	flag.BoolVar(&opts.date, "d", false, "Display date and time instead of offset")
