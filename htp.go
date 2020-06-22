@@ -14,8 +14,12 @@ import (
 	"time"
 )
 
-const second = int64(time.Second)
-const isoFormat = "2006-01-02T15:04:05.000Z07:00"
+const (
+	// isoFormat   = "2006-01-02T15:04:05.000Z07:00"
+	// unixFormat  = "Mon Jan _2 15:04:05.000 MST 2006"
+	macosFormat = "0102150406.05"
+	second      = int64(time.Second)
+)
 
 type options struct {
 	host    string
@@ -119,6 +123,12 @@ func syncSystem(offset int64) error {
 	case "linux":
 		arg := fmt.Sprintf("%+.3f seconds", toSec(-offset))
 		return exec.Command("date", "-s", arg).Run()
+	case "darwin":
+		now := time.Now().Add(time.Duration(-offset))
+		arg := now.Add(time.Second).Format(macosFormat)
+		sleep := time.Duration(int(time.Second) - now.Nanosecond())
+		time.Sleep(sleep)
+		return exec.Command("date", arg).Run()
 	default:
 		return fmt.Errorf("system not supported: %s", runtime.GOOS)
 	}
@@ -136,7 +146,7 @@ func parseArgs() *options {
 	flag.UintVar(&opts.count, "n", 8, "Number of requests")
 	flag.BoolVar(&opts.verbose, "v", false, "Show offsets during synchronization")
 	flag.BoolVar(&opts.date, "d", false, "Display date and time instead of offset")
-	flag.StringVar(&opts.format, "f", isoFormat, "Date and time format")
+	flag.StringVar(&opts.format, "f", time.UnixDate, "Date and time format")
 	flag.BoolVar(&opts.sync, "s", false, "Synchronize system time")
 	flag.Parse()
 
