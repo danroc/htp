@@ -1,3 +1,9 @@
-CD /D "%~dp0"
-PowerShell -Command "Set-Date -Adjust $([TimeSpan]::FromSeconds($(.\htp.exe -v -n 12)))"
-PAUSE
+@echo off
+
+if not "%1"=="am_admin" (
+    powershell Start -Verb RunAs '%0' am_admin & exit /b
+)
+
+cd /d "%~dp0"
+powershell -Command "Set-Date -Adjust $([TimeSpan]::FromSeconds($(.\htp.exe -v)))"
+pause
