@@ -13,14 +13,14 @@ import (
 )
 
 const second = int64(time.Second)
-const unixDateMilli = "02 Jan 2006 15:04:05.000 MST"
+const isoFormat = "2006-01-02T15:04:05.000Z07:00"
 
 type options struct {
 	host    string
 	count   uint
 	verbose bool
 	date    bool
-	layout  string
+	format  string
 }
 
 func main() {
@@ -96,7 +96,7 @@ func main() {
 
 	if opts.date {
 		now := time.Now().Add(time.Duration(-offset))
-		fmt.Printf("%s\n", now.Format(opts.layout))
+		fmt.Printf("%s\n", now.Format(opts.format))
 	} else {
 		fmt.Printf("%+.3f\n", toSec(-offset))
 	}
@@ -114,7 +114,7 @@ func parseArgs() *options {
 	flag.UintVar(&opts.count, "n", 8, "Number of requests")
 	flag.BoolVar(&opts.verbose, "v", false, "Show offsets during synchronization")
 	flag.BoolVar(&opts.date, "d", false, "Display date and time instead of offset")
-	flag.StringVar(&opts.layout, "f", unixDateMilli, "Date and time format")
+	flag.StringVar(&opts.format, "f", isoFormat, "Date and time format")
 	flag.Parse()
 
 	return &opts
