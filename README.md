@@ -1,3 +1,6 @@
+Algorithm
+=========
+
 Suppose that _T_ is the correct time (remote time) and our local time
 is offset by _θ_.
 
@@ -58,7 +61,7 @@ Observe that:
 - The _- θ_ term in the first equation above converts from local to
   remote time.
 
-- The _(t₂ - t₀)_ is an estimation of the round-trip time (RTT).
+- _(t₂ - t₀)_ is an estimation of the round-trip time (RTT).
 
 - We suppose that both the request and the response take half-RTT to go
   from the sender to the receiver.
