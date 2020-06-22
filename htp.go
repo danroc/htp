@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/http/httptrace"
 	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -20,6 +22,7 @@ type options struct {
 	count   uint
 	verbose bool
 	date    bool
+	sync    bool
 	format  string
 }
 
@@ -100,6 +103,25 @@ func main() {
 	} else {
 		fmt.Printf("%+.3f\n", toSec(-offset))
 	}
+
+	if opts.sync {
+		if err := syncSystem(offset); err != nil {
+			logger.Fatal("Cannot set system clock: ", err)
+		}
+	}
+}
+
+func syncSystem(offset int64) error {
+	switch runtime.GOOS {
+	case "windows":
+		arg := fmt.Sprintf("Set-Date -Adjust $([TimeSpan]::FromSeconds(%+.3f))", toSec(-offset))
+		return exec.Command("powershell", "-Command", arg).Run()
+	case "linux":
+		arg := fmt.Sprintf("%+.3f seconds", toSec(-offset))
+		return exec.Command("date", "-s", arg).Run()
+	default:
+		return fmt.Errorf("system not supported: %s", runtime.GOOS)
+	}
 }
 
 func parseArgs() *options {
@@ -115,6 +137,7 @@ func parseArgs() *options {
 	flag.BoolVar(&opts.verbose, "v", false, "Show offsets during synchronization")
 	flag.BoolVar(&opts.date, "d", false, "Display date and time instead of offset")
 	flag.StringVar(&opts.format, "f", isoFormat, "Date and time format")
+	flag.BoolVar(&opts.sync, "s", false, "Synchronize system time")
 	flag.Parse()
 
 	return &opts
