@@ -56,7 +56,7 @@ t₂ + d + (t₂ - t₀)/2 - θ = ⌊t₁⌋ + k, k ∈ ℤ
 
 ⇒ d = θ - t₂ - (t₂ - t₀)/2 mod 1
 
-Observe that:
+Where:
 
 - The _- θ_ term in the first equation above converts from local to
   remote time.
