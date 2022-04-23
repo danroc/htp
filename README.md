@@ -22,7 +22,7 @@ These steps are represented in the following diagram:
 
 Bringing _t₁_ to the local time (between _t₀_ and _t₂_):
 
-t₀ < t₁ + θ < t₂
+t₀ < t₁ + θ < t₂ ⇒  t₀ - t₁ < θ < t₂ - t₁
 
 So,
 
@@ -58,8 +58,4 @@ t₂ + d + (t₂ - t₀)/2 - θ = ⌊t₁⌋ + k, k ∈ ℤ
 Where:
 
 - _(t₂ - t₀)_ is an estimation of the round-trip time (RTT).
-
-  - We suppose that both the request and the response take half-RTT to go from
-    the sender to the receiver.
-
 - _- θ_ converts from local to remote time.
