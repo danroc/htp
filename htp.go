@@ -32,7 +32,7 @@ type options struct {
 
 func main() {
 	opts := parseArgs()
-	if strings.Index(opts.host, "://") == -1 {
+	if !strings.Contains(opts.host, "://") {
 		opts.host = "https://" + opts.host
 	}
 
