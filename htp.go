@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -30,6 +31,48 @@ type options struct {
 	format  string
 }
 
+type SyncContext struct {
+	lower int64
+	upper int64
+	rtt   int64
+}
+
+func NewSyncContext() *SyncContext {
+	return &SyncContext{
+		lower: math.MinInt64,
+		upper: math.MaxInt64,
+		rtt:   0,
+	}
+}
+
+func (ctx *SyncContext) Update(t0, t1, t2 int64) error {
+	ctx.rtt = t2 - t0
+	ctx.lower = max(ctx.lower, t0-t1-second)
+	ctx.upper = min(ctx.upper, t2-t1)
+
+	if ctx.lower > ctx.upper {
+		return errors.New("local or remote clock changed")
+	}
+	return nil
+}
+
+func (ctx *SyncContext) Offset() int64 {
+	return (ctx.upper + ctx.lower) / 2
+}
+
+func (ctx *SyncContext) Margin() int64 {
+	return (ctx.upper - ctx.lower) / 2
+}
+
+func (ctx *SyncContext) RTT() int64 {
+	return ctx.rtt
+}
+
+func (ctx *SyncContext) Delay(now int64) int64 {
+	delay := ctx.Offset() - ctx.RTT()/2 - now
+	return mod(delay, second)
+}
+
 func main() {
 	opts := parseArgs()
 	if !strings.Contains(opts.host, "://") {
@@ -50,10 +93,8 @@ func main() {
 
 	var (
 		t0, t2 int64
-		offset int64
 		sleep  int64
-		lo     int64 = math.MinInt64
-		hi     int64 = math.MaxInt64
+		sync   = NewSyncContext()
 	)
 
 	ctx := httptrace.WithClientTrace(req.Context(),
@@ -83,33 +124,28 @@ func main() {
 		}
 		t1 := date.UnixNano()
 
-		lo = max(lo, t0-t1-second)
-		hi = min(hi, t2-t1)
-		if hi < lo {
-			logger.Fatal("Cannot synchronize clocks: " +
-				"local or remote clock changed during synchronization")
+		if err := sync.Update(t0, t1, t2); err != nil {
+			logger.Fatal("Cannot synchronize clocks: ", err)
 		}
 
-		offset = (hi + lo) / 2
 		if opts.verbose {
-			margin := (hi - lo) / 2
+			margin := sync.Margin()
 			logger.Printf("offset: %+.3f (±%.3f) seconds\n",
-				toSec(offset), toSec(margin))
+				toSec(sync.Offset()), toSec(margin))
 		}
 
-		sleep = offset - (t2-t0)/2 - t2
-		sleep = mod(sleep, second)
+		sleep = sync.Delay(t2)
 	}
 
 	if opts.date {
-		now := time.Now().Add(time.Duration(-offset))
+		now := time.Now().Add(time.Duration(-sync.Offset()))
 		fmt.Printf("%s\n", now.Format(opts.format))
 	} else {
-		fmt.Printf("%+.3f\n", toSec(-offset))
+		fmt.Printf("%+.3f\n", toSec(-sync.Offset()))
 	}
 
 	if opts.sync {
-		if err := syncSystem(offset); err != nil {
+		if err := syncSystem(sync.Offset()); err != nil {
 			logger.Fatal("Cannot set system clock: ", err)
 		}
 	}
