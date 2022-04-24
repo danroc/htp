@@ -4,8 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
-	"net/http/httptrace"
 	"os"
 	"os/exec"
 	"runtime"
@@ -38,69 +36,40 @@ func main() {
 	}
 
 	logger := log.New(os.Stderr, "", 0)
-	client := &http.Client{}
-	client.Timeout = 10 * time.Second
-	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return http.ErrUseLastResponse
-	}
-
-	req, err := http.NewRequest("HEAD", opts.host, nil)
+	model := htp.NewSyncModel()
+	client, err := htp.NewSyncClient(opts.host, 10*time.Second)
 	if err != nil {
-		logger.Fatal("Invalid HTTP request: ", err)
+		logger.Fatal("Cannot create client: ", err)
 	}
-
-	var (
-		t0, t2 int64
-		sync   = htp.NewSyncModel()
-	)
-
-	ctx := httptrace.WithClientTrace(req.Context(),
-		&httptrace.ClientTrace{
-			WroteRequest: func(info httptrace.WroteRequestInfo) {
-				t0 = time.Now().UnixNano()
-			},
-			GotFirstResponseByte: func() {
-				t2 = time.Now().UnixNano()
-			},
-		},
-	)
 
 	for i := uint(0); i < opts.count; i++ {
-		time.Sleep(sync.Delay(time.Now().UnixNano()))
+		time.Sleep(model.Delay(time.Now().UnixNano()))
 
-		resp, err := client.Do(req.WithContext(ctx))
+		round, err := client.Round()
 		if err != nil {
-			logger.Fatal("Invalid HTTP response: ", err)
+			logger.Fatal("Cannot get HTTP times: ", err)
 		}
-		resp.Body.Close()
 
-		dateStr := resp.Header.Get("Date")
-		date, err := time.Parse(time.RFC1123, dateStr)
-		if err != nil {
-			logger.Fatal("Invalid HTTP response date: ", err)
-		}
-		t1 := date.UnixNano()
-
-		if err := sync.Update(t0, t1, t2); err != nil {
+		if err := model.Update(round); err != nil {
 			logger.Fatal("Cannot synchronize clocks: ", err)
 		}
 
 		if opts.verbose {
-			margin := sync.Margin()
+			margin := model.Margin()
 			logger.Printf("offset: %+.3f (±%.3f) seconds\n",
-				toSec(sync.Offset()), toSec(margin))
+				toSec(model.Offset()), toSec(margin))
 		}
 	}
 
 	if opts.date {
-		now := time.Now().Add(time.Duration(-sync.Offset()))
+		now := time.Now().Add(time.Duration(-model.Offset()))
 		fmt.Printf("%s\n", now.Format(opts.format))
 	} else {
-		fmt.Printf("%+.3f\n", toSec(-sync.Offset()))
+		fmt.Printf("%+.3f\n", toSec(-model.Offset()))
 	}
 
 	if opts.sync {
-		if err := syncSystem(sync.Offset()); err != nil {
+		if err := syncSystem(model.Offset()); err != nil {
 			logger.Fatal("Cannot set system clock: ", err)
 		}
 	}

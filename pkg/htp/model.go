@@ -13,6 +13,12 @@ const (
 	samples = 3
 )
 
+type SyncRound struct {
+	Send    int64
+	Remote  int64
+	Receive int64
+}
+
 type SyncModel struct {
 	count int
 	lower int64
@@ -29,7 +35,13 @@ func NewSyncModel() *SyncModel {
 	}
 }
 
-func (s *SyncModel) Update(t0, t1, t2 int64) error {
+func (s *SyncModel) Update(round *SyncRound) error {
+	var (
+		t0 = round.Send
+		t1 = round.Remote
+		t2 = round.Receive
+	)
+
 	s.rtt.Update(t2 - t0)
 	s.lower = max(s.lower, t0-t1-second)
 	s.upper = min(s.upper, t2-t1)
