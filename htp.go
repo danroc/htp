@@ -1,11 +1,9 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"log"
-	"math"
 	"net/http"
 	"net/http/httptrace"
 	"os"
@@ -13,6 +11,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/danroc/htp/pkg/htp"
 )
 
 const (
@@ -29,48 +29,6 @@ type options struct {
 	date    bool
 	sync    bool
 	format  string
-}
-
-type SyncContext struct {
-	lower int64
-	upper int64
-	rtt   int64
-}
-
-func NewSyncContext() *SyncContext {
-	return &SyncContext{
-		lower: math.MinInt64,
-		upper: math.MaxInt64,
-		rtt:   0,
-	}
-}
-
-func (ctx *SyncContext) Update(t0, t1, t2 int64) error {
-	ctx.rtt = t2 - t0
-	ctx.lower = max(ctx.lower, t0-t1-second)
-	ctx.upper = min(ctx.upper, t2-t1)
-
-	if ctx.lower > ctx.upper {
-		return errors.New("local or remote clock changed")
-	}
-	return nil
-}
-
-func (ctx *SyncContext) Offset() int64 {
-	return (ctx.upper + ctx.lower) / 2
-}
-
-func (ctx *SyncContext) Margin() int64 {
-	return (ctx.upper - ctx.lower) / 2
-}
-
-func (ctx *SyncContext) RTT() int64 {
-	return ctx.rtt
-}
-
-func (ctx *SyncContext) Delay(now int64) int64 {
-	delay := ctx.Offset() - ctx.RTT()/2 - now
-	return mod(delay, second)
 }
 
 func main() {
@@ -93,8 +51,7 @@ func main() {
 
 	var (
 		t0, t2 int64
-		sleep  int64
-		sync   = NewSyncContext()
+		sync   = htp.NewSyncModel()
 	)
 
 	ctx := httptrace.WithClientTrace(req.Context(),
@@ -109,7 +66,7 @@ func main() {
 	)
 
 	for i := uint(0); i < opts.count; i++ {
-		time.Sleep(time.Duration(sleep))
+		time.Sleep(sync.Delay(time.Now().UnixNano()))
 
 		resp, err := client.Do(req.WithContext(ctx))
 		if err != nil {
@@ -133,8 +90,6 @@ func main() {
 			logger.Printf("offset: %+.3f (±%.3f) seconds\n",
 				toSec(sync.Offset()), toSec(margin))
 		}
-
-		sleep = sync.Delay(t2)
 	}
 
 	if opts.date {
@@ -191,26 +146,4 @@ func parseArgs() *options {
 
 func toSec(t int64) float64 {
 	return float64(t) / float64(second)
-}
-
-func min(a, b int64) int64 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int64) int64 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func mod(x, m int64) int64 {
-	y := x % m
-	if y >= 0 {
-		return y
-	}
-	return m + y
 }
