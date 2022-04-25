@@ -42,23 +42,18 @@ func main() {
 		logger.Fatal("Cannot create client: ", err)
 	}
 
-	for i := uint(0); i < opts.count; i++ {
-		time.Sleep(model.Delay(time.Now().UnixNano()))
-
-		round, err := client.Round()
-		if err != nil {
-			logger.Fatal("Cannot get HTTP times: ", err)
-		}
-
-		if err := model.Update(round); err != nil {
-			logger.Fatal("Cannot synchronize clocks: ", err)
-		}
-
-		if opts.verbose {
-			margin := model.Margin()
-			logger.Printf("offset: %+.3f (±%.3f) seconds\n",
-				toSec(model.Offset()), toSec(margin))
-		}
+	options := &htp.SyncOptions{
+		Count: int(opts.count),
+		Trace: func(round *htp.SyncRound) {
+			if opts.verbose {
+				margin := model.Margin()
+				logger.Printf("offset: %+.3f (±%.3f) seconds\n",
+					toSec(model.Offset()), toSec(margin))
+			}
+		},
+	}
+	if err = htp.Sync(client, model, options); err != nil {
+		logger.Fatal("Cannot sync clock: ", err)
 	}
 
 	if opts.date {
