@@ -76,6 +76,10 @@ func (s *SyncModel) Delay(now int64) time.Duration {
 	return time.Duration(secMod(s.Offset() - s.RTT()/2 - now))
 }
 
+func (s *SyncModel) Sleep() {
+	time.Sleep(s.Delay(time.Now().UnixNano()))
+}
+
 func min(a, b int64) int64 {
 	if a < b {
 		return a
