@@ -46,9 +46,9 @@ func main() {
 		Count: int(opts.count),
 		Trace: func(round *htp.SyncRound) {
 			if opts.verbose {
+				offset := model.Offset()
 				margin := model.Margin()
-				logger.Printf("offset: %+.3f (±%.3f) seconds\n",
-					toSec(model.Offset()), toSec(margin))
+				logger.Printf("offset: %+.3f (±%.3f) seconds\n", toSec(offset), toSec(margin))
 			}
 		},
 	}
