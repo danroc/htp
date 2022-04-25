@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	second  = int64(time.Second)
-	samples = 3
+	second  = int64(time.Second) // Number of nanoseconds in one second
+	samples = 3                  // Number of samples in our moving average
 )
 
 type SyncRound struct {
