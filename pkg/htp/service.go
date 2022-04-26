@@ -2,7 +2,7 @@ package htp
 
 type SyncOptions struct {
 	Count int
-	Trace func(round *SyncRound)
+	Trace func(i int, round *SyncRound)
 }
 
 func Sync(client *SyncClient, model *SyncModel, options *SyncOptions) error {
@@ -19,7 +19,7 @@ func Sync(client *SyncClient, model *SyncModel, options *SyncOptions) error {
 		}
 
 		if options.Trace != nil {
-			options.Trace(round)
+			options.Trace(i, round)
 		}
 	}
 

@@ -47,10 +47,10 @@ func buildRootCommand() *cobra.Command {
 
 			options := &htp.SyncOptions{
 				Count: int(count),
-				Trace: func(round *htp.SyncRound) {
+				Trace: func(i int, round *htp.SyncRound) {
 					if !silent {
-						fmt.Fprintf(os.Stderr, "offset: %+.3f (±%.3f) seconds\n",
-							toSec(model.Offset()), toSec(model.Margin()))
+						fmt.Fprintf(os.Stderr, "(%d/%d) offset: %+.3f (±%.3f) seconds\n",
+							i+1, count, toSec(model.Offset()), toSec(model.Margin()))
 					}
 				},
 			}
