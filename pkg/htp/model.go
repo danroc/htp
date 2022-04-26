@@ -87,6 +87,10 @@ func (s *SyncModel) Sleep() {
 	time.Sleep(s.Delay(now))
 }
 
+func (s *SyncModel) Now() time.Time {
+	return time.Now().Add(time.Duration(-s.Offset()))
+}
+
 func min(a, b NanoSec) NanoSec {
 	if a < b {
 		return a

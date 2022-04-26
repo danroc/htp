@@ -48,20 +48,19 @@ func Sync(client *SyncClient, model *SyncModel, trace *SyncTrace) error {
 	return nil
 }
 
-func SyncSystem(offset NanoSec) error {
+func SyncSystem(model *SyncModel) error {
 	switch runtime.GOOS {
 	case "windows":
-		arg := fmt.Sprintf("Set-Date -Adjust $([TimeSpan]::FromSeconds(%+.3f))", -offset.Sec())
+		arg := fmt.Sprintf("Set-Date -Adjust $([TimeSpan]::FromSeconds(%+.3f))", -model.Offset().Sec())
 		return exec.Command("powershell", "-Command", arg).Run()
 
 	case "linux":
-		arg := fmt.Sprintf("%+.3f seconds", -offset.Sec())
+		arg := fmt.Sprintf("%+.3f seconds", -model.Offset().Sec())
 		return exec.Command("date", "-s", arg).Run()
 
 	case "darwin":
-		now := time.Now().Add(time.Duration(-offset))
-		arg := now.Add(time.Second).Format(macosFormat)
-		sleep := time.Duration(int(time.Second) - now.Nanosecond())
+		arg := model.Now().Add(time.Second).Format(macosFormat)
+		sleep := time.Duration(int(time.Second) - model.Now().Nanosecond())
 		time.Sleep(sleep)
 		return exec.Command("date", arg).Run()
 

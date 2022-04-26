@@ -52,14 +52,13 @@ func buildRootCommand() *cobra.Command {
 			}
 
 			if date {
-				now := time.Now().Add(time.Duration(-model.Offset()))
-				fmt.Printf("%s\n", now.Format(format))
+				fmt.Printf("%s\n", model.Now().Format(format))
 			} else {
 				fmt.Printf("%+.3f\n", -model.Offset().Sec())
 			}
 
 			if sync {
-				if err := htp.SyncSystem(model.Offset()); err != nil {
+				if err := htp.SyncSystem(model); err != nil {
 					return fmt.Errorf("cannot set system clock: %w", err)
 				}
 			}
