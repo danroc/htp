@@ -1,9 +1,7 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -11,6 +9,7 @@ import (
 	"time"
 
 	"github.com/danroc/htp/pkg/htp"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -20,53 +19,78 @@ const (
 	second      = int64(time.Second)
 )
 
-type options struct {
-	host    string
-	count   uint
-	verbose bool
-	date    bool
-	sync    bool
-	format  string
+func buildRootCommand() *cobra.Command {
+	var (
+		host    string
+		silent  bool
+		format  string
+		sync    bool
+		date    bool
+		count   int
+		timeout int
+	)
+
+	cmd := &cobra.Command{
+		Use:   "htp",
+		Short: "HTP - Date and time from HTTP headers",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if !strings.Contains(host, "://") {
+				host = "https://" + host
+			}
+
+			client, err := htp.NewSyncClient(host, time.Duration(timeout)*time.Second)
+			if err != nil {
+				return nil
+			}
+
+			model := htp.NewSyncModel()
+
+			options := &htp.SyncOptions{
+				Count: int(count),
+				Trace: func(round *htp.SyncRound) {
+					if !silent {
+						fmt.Fprintf(os.Stderr, "offset: %+.3f (±%.3f) seconds\n",
+							toSec(model.Offset()), toSec(model.Margin()))
+					}
+				},
+			}
+
+			if err := htp.Sync(client, model, options); err != nil {
+				return err
+			}
+
+			if date {
+				now := time.Now().Add(time.Duration(-model.Offset()))
+				fmt.Printf("%s\n", now.Format(format))
+			} else {
+				fmt.Printf("%+.3f\n", toSec(-model.Offset()))
+			}
+
+			if sync {
+				if err := syncSystem(model.Offset()); err != nil {
+					return fmt.Errorf("cannot set system clock: %w", err)
+				}
+			}
+
+			return nil
+		},
+	}
+
+	cmd.Flags().IntVarP(&count, "num-requests", "n", 10, "Number of requests")
+	cmd.Flags().IntVarP(&timeout, "timeout", "t", 10, "Timeout in seconds")
+	cmd.Flags().BoolVarP(&silent, "silent", "s", false, "Do not show offsets")
+	cmd.Flags().BoolVarP(&date, "date", "d", false, "Show date and time instead of offset")
+	cmd.Flags().BoolVarP(&sync, "set", "e", false, "Set system time")
+	cmd.Flags().StringVarP(&format, "format", "f", time.UnixDate, "Date and time format")
+	cmd.Flags().StringVarP(&host, "url", "u", "https://www.google.com", "Host URL")
+
+	return cmd
 }
 
 func main() {
-	opts := parseArgs()
-	if !strings.Contains(opts.host, "://") {
-		opts.host = "https://" + opts.host
-	}
-
-	logger := log.New(os.Stderr, "", 0)
-	model := htp.NewSyncModel()
-	client, err := htp.NewSyncClient(opts.host, 10*time.Second)
-	if err != nil {
-		logger.Fatal("Cannot create client: ", err)
-	}
-
-	options := &htp.SyncOptions{
-		Count: int(opts.count),
-		Trace: func(round *htp.SyncRound) {
-			if opts.verbose {
-				offset := model.Offset()
-				margin := model.Margin()
-				logger.Printf("offset: %+.3f (±%.3f) seconds\n", toSec(offset), toSec(margin))
-			}
-		},
-	}
-	if err = htp.Sync(client, model, options); err != nil {
-		logger.Fatal("Cannot sync clock: ", err)
-	}
-
-	if opts.date {
-		now := time.Now().Add(time.Duration(-model.Offset()))
-		fmt.Printf("%s\n", now.Format(opts.format))
-	} else {
-		fmt.Printf("%+.3f\n", toSec(-model.Offset()))
-	}
-
-	if opts.sync {
-		if err := syncSystem(model.Offset()); err != nil {
-			logger.Fatal("Cannot set system clock: ", err)
-		}
+	cmd := buildRootCommand()
+	if err := cmd.Execute(); err != nil {
+		os.Exit(1)
 	}
 }
 
@@ -87,25 +111,6 @@ func syncSystem(offset int64) error {
 	default:
 		return fmt.Errorf("system not supported: %s", runtime.GOOS)
 	}
-}
-
-func parseArgs() *options {
-	flag.Usage = func() {
-		fmt.Fprintf(flag.CommandLine.Output(),
-			"HTP - Date and time from HTTP headers\n\nUsage:\n")
-		flag.PrintDefaults()
-	}
-
-	opts := options{}
-	flag.StringVar(&opts.host, "u", "https://www.google.com", "Host URL")
-	flag.UintVar(&opts.count, "n", 8, "Number of requests")
-	flag.BoolVar(&opts.verbose, "v", false, "Show offsets during synchronization")
-	flag.BoolVar(&opts.date, "d", false, "Display date and time instead of offset")
-	flag.StringVar(&opts.format, "f", time.UnixDate, "Date and time format")
-	flag.BoolVar(&opts.sync, "s", false, "Synchronize system time")
-	flag.Parse()
-
-	return &opts
 }
 
 func toSec(t int64) float64 {
