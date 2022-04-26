@@ -22,8 +22,9 @@ func buildRootCommand() *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:   "htp",
-		Short: "HTP - Date and time from HTTP headers",
+		Use:          "htp",
+		Short:        "HTP - Date and time from HTTP headers",
+		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !strings.Contains(host, "://") {
 				host = "https://" + host
