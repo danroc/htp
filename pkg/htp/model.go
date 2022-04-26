@@ -9,21 +9,27 @@ import (
 )
 
 const (
-	second  = int64(time.Second) // Number of nanoseconds in one second
-	samples = 3                  // Number of samples in our moving average
+	second  = NanoSec(time.Second) // Number of nanoseconds in one second
+	samples = 3                    // Number of samples in our moving average
 )
 
+type NanoSec int64
+
+func (ns NanoSec) Sec() float64 {
+	return float64(ns) / float64(time.Second)
+}
+
 type SyncRound struct {
-	Send    int64
-	Remote  int64
-	Receive int64
+	Send    NanoSec
+	Remote  NanoSec
+	Receive NanoSec
 }
 
 type SyncModel struct {
 	count int
-	lower int64
-	upper int64
-	rtt   *ema.EMA[int64]
+	lower NanoSec
+	upper NanoSec
+	rtt   *ema.EMA[NanoSec]
 }
 
 func NewSyncModel() *SyncModel {
@@ -31,7 +37,7 @@ func NewSyncModel() *SyncModel {
 		count: 0,
 		lower: math.MinInt64,
 		upper: math.MaxInt64,
-		rtt:   ema.NewDefaultEMA[int64](samples),
+		rtt:   ema.NewDefaultEMA[NanoSec](samples),
 	}
 }
 
@@ -53,15 +59,15 @@ func (s *SyncModel) Update(round *SyncRound) error {
 	return nil
 }
 
-func (s *SyncModel) Offset() int64 {
+func (s *SyncModel) Offset() NanoSec {
 	return (s.upper + s.lower) / 2
 }
 
-func (s *SyncModel) Margin() int64 {
+func (s *SyncModel) Margin() NanoSec {
 	return (s.upper - s.lower) / 2
 }
 
-func (s *SyncModel) RTT() int64 {
+func (s *SyncModel) RTT() NanoSec {
 	return s.rtt.Average()
 }
 
@@ -69,7 +75,7 @@ func (s *SyncModel) Count() int {
 	return s.count
 }
 
-func (s *SyncModel) Delay(now int64) time.Duration {
+func (s *SyncModel) Delay(now NanoSec) time.Duration {
 	if s.count == 0 {
 		return time.Duration(0)
 	}
@@ -77,24 +83,25 @@ func (s *SyncModel) Delay(now int64) time.Duration {
 }
 
 func (s *SyncModel) Sleep() {
-	time.Sleep(s.Delay(time.Now().UnixNano()))
+	now := NanoSec(time.Now().UnixNano())
+	time.Sleep(s.Delay(now))
 }
 
-func min(a, b int64) int64 {
+func min(a, b NanoSec) NanoSec {
 	if a < b {
 		return a
 	}
 	return b
 }
 
-func max(a, b int64) int64 {
+func max(a, b NanoSec) NanoSec {
 	if a > b {
 		return a
 	}
 	return b
 }
 
-func secMod(x int64) int64 {
+func secMod(x NanoSec) NanoSec {
 	y := x % second
 	if y >= 0 {
 		return y

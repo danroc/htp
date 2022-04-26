@@ -11,8 +11,8 @@ type SyncClient struct {
 	client  *http.Client
 	context context.Context
 	request *http.Request
-	tSend   int64
-	tRecv   int64
+	tSend   NanoSec
+	tRecv   NanoSec
 }
 
 func NewSyncClient(host string, timeout time.Duration) (*SyncClient, error) {
@@ -33,10 +33,10 @@ func NewSyncClient(host string, timeout time.Duration) (*SyncClient, error) {
 	s.context = httptrace.WithClientTrace(s.request.Context(),
 		&httptrace.ClientTrace{
 			WroteRequest: func(info httptrace.WroteRequestInfo) {
-				s.tSend = time.Now().UnixNano()
+				s.tSend = NanoSec(time.Now().UnixNano())
 			},
 			GotFirstResponseByte: func() {
-				s.tRecv = time.Now().UnixNano()
+				s.tRecv = NanoSec(time.Now().UnixNano())
 			},
 		},
 	)
@@ -59,7 +59,7 @@ func (s *SyncClient) Round() (*SyncRound, error) {
 
 	return &SyncRound{
 		Send:    s.tSend,
-		Remote:  date.UnixNano(),
+		Remote:  NanoSec(date.UnixNano()),
 		Receive: s.tRecv,
 	}, nil
 }
