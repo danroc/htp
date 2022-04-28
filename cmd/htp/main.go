@@ -47,6 +47,9 @@ func buildRootCommand() *cobra.Command {
 				},
 			}
 
+			if !silent {
+				fmt.Fprintf(os.Stderr, "Syncing with %s ...\n", host)
+			}
 			if err := htp.Sync(client, model, trace); err != nil {
 				return err
 			}
@@ -67,7 +70,7 @@ func buildRootCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().IntVarP(&count, "num-requests", "n", 10, "Number of requests")
+	cmd.Flags().IntVarP(&count, "num-requests", "n", 8, "Number of requests")
 	cmd.Flags().IntVarP(&timeout, "timeout", "t", 10, "Timeout in seconds")
 	cmd.Flags().BoolVarP(&silent, "silent", "s", false, "Do not show offsets")
 	cmd.Flags().BoolVarP(&date, "date", "d", false, "Show date and time instead of offset")
