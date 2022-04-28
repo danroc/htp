@@ -31,4 +31,9 @@ func (e *EMA[T]) Average() T {
 
 func (e *EMA[T]) Update(x T) {
 	e.value = e.alpha*float64(x) + (1-e.alpha)*e.value
+	e.count++
+}
+
+func (e *EMA[T]) Count() int {
+	return e.count
 }
