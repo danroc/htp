@@ -1,0 +1,31 @@
+before:
+  hooks:
+    - go mod tidy
+gomod:
+  proxy: true
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    main: ./cmd/htp/
+archives:
+  - replacements:
+      darwin: macos
+      386: x86
+    format_overrides:
+      - goos: windows
+        format: zip
+    wrap_in_directory: true
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-snapshot"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
