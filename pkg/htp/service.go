@@ -34,3 +34,7 @@ func Sync(client *SyncClient, model *SyncModel, trace *SyncTrace) error {
 
 	return nil
 }
+
+func SyncSystem(model *SyncModel) error {
+	return syncSystem(model)
+}
