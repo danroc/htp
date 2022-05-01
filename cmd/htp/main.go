@@ -10,13 +10,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func main() {
+	cmd := buildRootCommand()
+	if err := cmd.Execute(); err != nil {
+		os.Exit(1)
+	}
+}
+
 func buildRootCommand() *cobra.Command {
 	var (
 		host    string
 		silent  bool
 		format  string
 		sync    bool
-		date    bool
+		offset  bool
 		count   int
 		timeout int
 	)
@@ -40,40 +47,41 @@ func buildRootCommand() *cobra.Command {
 				Before: func(i int) bool { return i < count },
 				After: func(i int, round *htp.SyncRound) bool {
 					if !silent {
-						fmt.Fprintf(os.Stderr, "(%d/%d) offset: %+.3f (±%.3f) seconds\n",
-							i+1, count, model.Offset().Sec(), model.Margin().Sec())
+						log("(%d/%d) offset: %+.3f (±%.3f) seconds", i+1, count,
+							model.Offset().Sec(), model.Margin().Sec())
 					}
 					return true
 				},
 			}
 
 			if !silent {
-				fmt.Fprintf(os.Stderr, "Syncing with %s ...\n", host)
+				log("Syncing with %s ...", host)
 			}
 			if err := htp.Sync(client, model, trace); err != nil {
 				return err
 			}
 
-			if date {
-				fmt.Printf("%s\n", model.Now().Format(format))
-			} else {
+			if offset {
 				fmt.Printf("%+.3f\n", -model.Offset().Sec())
+			} else {
+				fmt.Printf("%s\n", model.Now().Format(format))
 			}
 
 			if sync {
 				if err := htp.SyncSystem(model); err != nil {
 					return fmt.Errorf("cannot set system clock: %w", err)
 				}
+				log("System time set")
 			}
 
 			return nil
 		},
 	}
 
-	cmd.Flags().IntVarP(&count, "num-requests", "n", 8, "Number of requests")
+	cmd.Flags().IntVarP(&count, "requests", "n", 8, "Number of requests")
 	cmd.Flags().IntVarP(&timeout, "timeout", "t", 10, "Timeout in seconds")
 	cmd.Flags().BoolVarP(&silent, "silent", "s", false, "Do not show offsets")
-	cmd.Flags().BoolVarP(&date, "date", "d", false, "Show date and time instead of offset")
+	cmd.Flags().BoolVarP(&offset, "offset", "o", false, "Show offset instead of date and time")
 	cmd.Flags().BoolVarP(&sync, "set", "e", false, "Set system time")
 	cmd.Flags().StringVarP(&format, "format", "f", time.UnixDate, "Date and time format")
 	cmd.Flags().StringVarP(&host, "url", "u", "https://www.google.com", "Host URL")
@@ -81,9 +89,6 @@ func buildRootCommand() *cobra.Command {
 	return cmd
 }
 
-func main() {
-	cmd := buildRootCommand()
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+func log(format string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, format+"\n", args...)
 }
