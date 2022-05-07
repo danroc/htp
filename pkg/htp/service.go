@@ -5,11 +5,6 @@ type SyncTrace struct {
 	After  func(i int, round *SyncRound) bool
 }
 
-type SyncOptions struct {
-	Count int
-	Trace *SyncTrace
-}
-
 func Sync(client *SyncClient, model *SyncModel, trace *SyncTrace) error {
 	for i := 0; ; i++ {
 		if !trace.Before(i) {
