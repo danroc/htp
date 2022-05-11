@@ -2,7 +2,7 @@
 
 HTP uses time information present in HTTP headers to determine the clock offset
 between two machines. It can be used to synchronize the local clock using a
-trusted HTTP(S) server.
+trusted HTTP(S) server, or determine the time of the remote server.
 
 ## Build
 
