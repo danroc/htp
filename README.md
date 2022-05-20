@@ -12,7 +12,7 @@ go build ./cmd/htp
 
 ## Installation
 
-Download the binary from the releases page.
+Download the binary from the [releases page](https://github.com/danroc/htp/releases/latest).
 
 ## Algorithm
 
