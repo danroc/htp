@@ -16,14 +16,14 @@ Download the binary from the [releases page](https://github.com/danroc/htp/relea
 
 ## Algorithm
 
-Suppose that $T$ is the correct time (remote time) and our local time is offset
-by $\theta$.
+Suppose that _T_ is the correct time (remote time) and our local time is offset
+by _θ_.
 
-To approximate $\theta$, we perform these steps:
+To approximate _θ_, we perform these steps:
 
-1. (A) sends a request to (B) at $t_0$ (local clock)
-2. (B) receives and answers (A)'s request at $t_1$ (remote clock)
-3. (A) receives (B)'s answer at $t_2$ (local clock)
+1. (A) sends a request to (B) at _t₀_ (local clock)
+2. (B) receives and answers (A)'s request at _t₁_ (remote clock)
+3. (A) receives (B)'s answer at _t₂_ (local clock)
 
 These steps are represented in the following diagram:
 
@@ -36,45 +36,42 @@ These steps are represented in the following diagram:
          t₀    t₂
 ```
 
-Bringing $t_1$ to the local time (between $t_0$ and $t_2$):
+Bringing _t₁_ to the local time (between _t₀_ and _t₂_):
 
-$$
-t_0 < t_1 + \theta < t_2 \Rightarrow t_0 - t_1 < \theta < t_2 - t_1
-$$
+t₀ < t₁ + θ < t₂ ⇒ t₀ - t₁ < θ < t₂ - t₁
 
 So,
 
-- $\theta > t_0 - t_1$
-- $\theta < t_2 - t_1$
+- θ > t₀ - t₁
+- θ < t₂ - t₁
 
-But we must use $\lfloor t_1 \rfloor$ instead of $t_1$ in our calculations
-because it is the only time information present in the HTTP response header.
+But we must use _⌊t₁⌋_ instead of _t₁_ in our calculations because it is the
+only time information present in the HTTP response header.
 
-Since $t_1 \in [\lfloor t_1 \rfloor, \lfloor t_1 \rfloor + 1)$, then:
+Since _t₁ ∈ [⌊t₁⌋, ⌊t₁⌋ + 1)_, then:
 
-- $\theta > t_0 - \lfloor t_1 \rfloor - 1$
-- $\theta < t_2 - \lfloor t_1 \rfloor$
+- θ > t₀ - ⌊t₁⌋ - 1
+- θ < t₂ - ⌊t₁⌋
 
-Observe that the closer $t_1$ is to $\lfloor t_1 \rfloor$ or $\lfloor t_1
-\rfloor + 1$, smaller is the error in the second or first equation above,
-respectively.
+Observe that the closer _t₁_ is to _⌊t₁⌋_ or _⌊t₁⌋ + 1_, smaller is the error in
+the second or first equation above, respectively.
 
-We can repeat the above procedure to improve our estimate of $\theta$:
+We can repeat the above procedure to improve our estimate of _θ_:
 
-- $\theta^- = MAX(\theta^-, t_0 - \lfloor t_1 \rfloor - 1)$
-- $\theta^+ = MIN(\theta^+, t_2 - \lfloor t_1 \rfloor)$
-- $\theta = (\theta^+ + \theta^-)/2$
+- θ⁻ = MAX(θ⁻, t₀ - ⌊t₁⌋ - 1)
+- θ⁺ = MIN(θ⁺, t₂ - ⌊t₁⌋)
+- θ = (θ⁺ + θ⁻)/2
 
-The ideal delay $d$ to wait before sending the next request is calculated so
-that the next value of $t_1$ is close to a "full" second:
+The ideal delay _d_ to wait before sending the next request is calculated so
+that the next value of _t₁_ is close to a "full" second:
 
-$$
-t_2 + d + (t_2 - t_0)/2 - \theta = \lfloor t_1 \rfloor + k, k \in \mathbb{Z}\\
-\Rightarrow d = \lfloor t_1 \rfloor + k + \theta - t_2 - (t_2 - t_0)/2 \mod 1\\
-\Rightarrow d = \theta - t_2 - (t_2 - t_0)/2 \mod 1
-$$
+t₂ + d + (t₂ - t₀)/2 - θ = ⌊t₁⌋ + k, k ∈ ℤ
+
+⇒ d = ⌊t₁⌋ + k + θ - t₂ - (t₂ - t₀)/2 mod 1
+
+⇒ d = θ - t₂ - (t₂ - t₀)/2 mod 1
 
 Where:
 
-- $(t_2 - t_0)$ is an estimation of the round-trip time (RTT).
-- $-\theta$ converts from local to remote time.
+- _(t₂ - t₀)_ is an estimation of the round-trip time (RTT).
+- _- θ_ converts from local to remote time.
