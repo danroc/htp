@@ -2,6 +2,7 @@ package htp
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/http/httptrace"
 	"time"
@@ -49,6 +50,9 @@ func (s *SyncClient) Round() (*SyncRound, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Read and close the body to make sure that the connection can be reused.
+	io.Copy(io.Discard, resp.Body)
 	resp.Body.Close()
 
 	dateStr := resp.Header.Get("Date")
