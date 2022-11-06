@@ -61,8 +61,8 @@ Since _t₁ ∈ [⌊t₁⌋, ⌊t₁⌋ + 1)_, then:
 - θ > t₀ - ⌊t₁⌋ - 1
 - θ < t₂ - ⌊t₁⌋
 
-Observe that the closer _t₁_ is to _⌊t₁⌋_ or _⌊t₁⌋ + 1_, smaller is the error in
-the second or first equation above, respectively.
+Observe that the closer _t₁_ is to _⌊t₁⌋_ or _⌊t₁⌋ + 1_, smaller is the error
+in the second or first equation above, respectively.
 
 We can repeat the above procedure to improve our estimate of _θ_:
 
