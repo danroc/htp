@@ -16,7 +16,7 @@ Download the binary from the [releases page](https://github.com/danroc/htp/relea
 go install github.com/danroc/htp/cmd/htp@latest
 ```
 
-## Build
+## Building
 
 ```console
 go build ./cmd/htp
