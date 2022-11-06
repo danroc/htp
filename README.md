@@ -29,7 +29,7 @@ by _θ_.
 
 To approximate _θ_, we perform these steps:
 
-1. (A) sends a request to (B) at _t₀_ (local clock)
+1. (A, local) sends a request to (B, remote) at _t₀_ (local clock)
 2. (B) receives and answers (A)'s request at _t₁_ (remote clock)
 3. (A) receives (B)'s answer at _t₂_ (local clock)
 
