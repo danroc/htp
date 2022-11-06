@@ -83,3 +83,15 @@ Where:
 
 - _(t₂ - t₀)_ is an estimation of the round-trip time (RTT).
 - _- θ_ converts from local to remote time.
+
+## Alternatives
+
+- One-liner:
+
+  ```bash
+  date -s "$(curl -fsSLI https://www.google.com | grep -i "Date: " | cut -d" " -f2-)"
+  ```
+
+- [Time over HTTPS](http://phk.freebsd.dk/time/20151129/)
+
+- [htpdate](https://www.vervest.org/htp/)
