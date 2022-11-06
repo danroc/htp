@@ -4,12 +4,6 @@ HTP uses time information present in HTTP headers to determine the clock offset
 between two machines. It can be used to synchronize the local clock using a
 trusted HTTP(S) server, or to determine the time of the remote machine.
 
-## Build
-
-```console
-go build ./cmd/htp
-```
-
 ## Installation
 
 ### From pre-built binaries
@@ -20,6 +14,12 @@ Download the binary from the [releases page](https://github.com/danroc/htp/relea
 
 ```bash
 go install github.com/danroc/htp/cmd/htp@latest
+```
+
+## Build
+
+```console
+go build ./cmd/htp
 ```
 
 ## Algorithm
