@@ -6,17 +6,17 @@ trusted HTTP(S) server, or to determine the time of the remote machine.
 
 ## Installation
 
-### From pre-built binaries
+Download the binary for your platform from the [releases page](https://github.com/danroc/htp/releases/latest).
 
-Download the binary from the [releases page](https://github.com/danroc/htp/releases/latest).
-
-### From source
+Or install it with `go`:
 
 ```bash
 go install github.com/danroc/htp/cmd/htp@latest
 ```
 
 ## Building
+
+To build the main application, run:
 
 ```console
 go build ./cmd/htp
@@ -25,7 +25,7 @@ go build ./cmd/htp
 ## Algorithm
 
 Suppose that _T_ is the correct time (remote time) and our local time is offset
-by _θ_.
+by _θ_ (thus local time is _T + θ_).
 
 To approximate _θ_, we perform these steps:
 
