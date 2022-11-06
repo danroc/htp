@@ -61,6 +61,8 @@ func buildRootCommand() *cobra.Command {
 				return err
 			}
 
+			// Always print the result, it can be silenced by the user by
+			// redirecting the standard output to /dev/null.
 			if offset {
 				fmt.Printf("%+.3f\n", -model.Offset().Sec())
 			} else {
