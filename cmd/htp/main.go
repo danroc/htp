@@ -46,17 +46,13 @@ func buildRootCommand() *cobra.Command {
 			trace := &htp.SyncTrace{
 				Before: func(i int) bool { return i < count },
 				After: func(i int, round *htp.SyncRound) bool {
-					if !silent {
-						log("(%d/%d) offset: %+.3f (±%.3f) seconds", i+1, count,
-							model.Offset().Sec(), model.Margin().Sec())
-					}
+					logInfo(silent, "(%d/%d) offset: %+.3f (±%.3f) seconds", i+1, count,
+						model.Offset().Sec(), model.Margin().Sec())
 					return true
 				},
 			}
 
-			if !silent {
-				log("Syncing with %s ...", host)
-			}
+			logInfo(silent, "Syncing with %s ...", host)
 			if err := htp.Sync(client, model, trace); err != nil {
 				return err
 			}
@@ -73,7 +69,7 @@ func buildRootCommand() *cobra.Command {
 				if err := htp.SyncSystem(model); err != nil {
 					return fmt.Errorf("cannot set system clock: %w", err)
 				}
-				log("System time set")
+				logInfo(silent, "System time set")
 			}
 
 			return nil
@@ -91,6 +87,12 @@ func buildRootCommand() *cobra.Command {
 	return cmd
 }
 
-func log(format string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, format+"\n", args...)
+// All "information" logging must done using this function.
+//
+// It prints to stderr instead of stdout to allow the user to directly use the
+// output of htp in a shell script.
+func logInfo(silent bool, format string, args ...interface{}) {
+	if !silent {
+		fmt.Fprintf(os.Stderr, format+"\n", args...)
+	}
 }
