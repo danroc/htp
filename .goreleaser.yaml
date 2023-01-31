@@ -16,7 +16,7 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
-    wrap_in_directory: true
+    wrap_in_directory: htp
 checksum:
   name_template: 'checksums.txt'
 snapshot:
