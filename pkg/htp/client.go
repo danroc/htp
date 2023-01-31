@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// SyncClient is a HTP synchronization client.
 type SyncClient struct {
 	client  *http.Client
 	context context.Context
@@ -16,11 +17,15 @@ type SyncClient struct {
 	tRecv   NanoSec
 }
 
+// SyncTrace defines the functions to be executed before and after each
+// synchronization round.
 type SyncTrace struct {
 	Before func(model *SyncModel) bool
 	After  func(model *SyncModel, round *SyncRound) bool
 }
 
+// NewSyncClient creates a new HTP synchronization-client. It will use the host
+// as remote server, and timeout sets the total HTTP timeout.
 func NewSyncClient(host string, timeout time.Duration) (*SyncClient, error) {
 	s := &SyncClient{}
 
@@ -50,6 +55,7 @@ func NewSyncClient(host string, timeout time.Duration) (*SyncClient, error) {
 	return s, nil
 }
 
+// Round does a synchronization round (request-response).
 func (s *SyncClient) Round() (*SyncRound, error) {
 	resp, err := s.client.Do(s.request.WithContext(s.context))
 	if err != nil {
@@ -73,6 +79,8 @@ func (s *SyncClient) Round() (*SyncRound, error) {
 	}, nil
 }
 
+// Sync performs a full synchronization and updates a SyncModel. SyncTrace is
+// used to control when to stop the synchronization.
 func (s *SyncClient) Sync(model *SyncModel, trace *SyncTrace) error {
 	for {
 		if !trace.Before(model) {

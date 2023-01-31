@@ -13,18 +13,22 @@ const (
 	samples = 3                    // Number of samples in our moving average
 )
 
+// NanoSec represents a time or duration in nanoseconds.
 type NanoSec int64
 
+// Sec converts a nanosecond value to seconds.
 func (ns NanoSec) Sec() float64 {
 	return float64(ns) / float64(time.Second)
 }
 
+// SyncRound stores the timestamps of a synchronization round.
 type SyncRound struct {
 	Send    NanoSec
 	Remote  NanoSec
 	Receive NanoSec
 }
 
+// SyncModel stores the state of the model used in a HTP synchronization.
 type SyncModel struct {
 	count int
 	lower NanoSec
@@ -32,6 +36,7 @@ type SyncModel struct {
 	rtt   *ema.EMA[NanoSec]
 }
 
+// NewSyncModel returns a new SyncModel.
 func NewSyncModel() *SyncModel {
 	return &SyncModel{
 		count: 0,
@@ -41,6 +46,7 @@ func NewSyncModel() *SyncModel {
 	}
 }
 
+// Update updates the model given a new synchronization round.
 func (s *SyncModel) Update(round *SyncRound) error {
 	var (
 		t0 = round.Send
@@ -59,22 +65,29 @@ func (s *SyncModel) Update(round *SyncRound) error {
 	return nil
 }
 
+// Offset returns the current estimate of the offset between local and remote
+// clocks.
 func (s *SyncModel) Offset() NanoSec {
 	return (s.upper + s.lower) / 2
 }
 
+// Offset returns the current synchronization error margin.
 func (s *SyncModel) Margin() NanoSec {
 	return (s.upper - s.lower) / 2
 }
 
+// RTT returns the current average of the round-trip-time.
 func (s *SyncModel) RTT() NanoSec {
 	return s.rtt.Average()
 }
 
+// Count returns the number of rounds used to update the model.
 func (s *SyncModel) Count() int {
 	return s.count
 }
 
+// Delay returns the delay from now that we should wait before sending the next
+// HTTP request.
 func (s *SyncModel) Delay(now NanoSec) time.Duration {
 	if s.count == 0 {
 		return time.Duration(0)
@@ -82,15 +95,19 @@ func (s *SyncModel) Delay(now NanoSec) time.Duration {
 	return time.Duration(secMod(s.Offset() - s.RTT()/2 - now))
 }
 
+// Sleep waits (calls time.Sleep()) until it's time to send the next HTTP
+// request.
 func (s *SyncModel) Sleep() {
 	now := NanoSec(time.Now().UnixNano())
 	time.Sleep(s.Delay(now))
 }
 
+// Now returns the estimate of the current time of the remote host.
 func (s *SyncModel) Now() time.Time {
 	return time.Now().Add(time.Duration(-s.Offset()))
 }
 
+// min returns the minimum value between two NanoSec variables.
 func min(a, b NanoSec) NanoSec {
 	if a < b {
 		return a
@@ -98,6 +115,7 @@ func min(a, b NanoSec) NanoSec {
 	return b
 }
 
+// max returns the maximum value between two NanoSec variables.
 func max(a, b NanoSec) NanoSec {
 	if a > b {
 		return a
@@ -105,6 +123,7 @@ func max(a, b NanoSec) NanoSec {
 	return b
 }
 
+// secMod returns the number of nanoseconds past a round second value.
 func secMod(x NanoSec) NanoSec {
 	y := x % second
 	if y >= 0 {
