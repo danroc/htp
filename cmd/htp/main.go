@@ -44,17 +44,17 @@ func buildRootCommand() *cobra.Command {
 			}
 
 			trace := &htp.SyncTrace{
-				Before: func(i int) bool { return i < count },
-				After: func(i int, round *htp.SyncRound) bool {
+				Before: func(model *htp.SyncModel) bool { return model.Count() < count },
+				After: func(model *htp.SyncModel, round *htp.SyncRound) bool {
 					logInfo(
-						silent, "(%d/%d) offset: %+.3f (±%.3f) seconds", i+1,
+						silent, "(%d/%d) offset: %+.3f (±%.3f) seconds", model.Count(),
 						count, model.Offset().Sec(), model.Margin().Sec())
 					return true
 				},
 			}
 
 			logInfo(silent, "Syncing with %s ...", host)
-			if err := htp.Sync(client, model, trace); err != nil {
+			if err := client.Sync(model, trace); err != nil {
 				return err
 			}
 

@@ -16,6 +16,11 @@ type SyncClient struct {
 	tRecv   NanoSec
 }
 
+type SyncTrace struct {
+	Before func(model *SyncModel) bool
+	After  func(model *SyncModel, round *SyncRound) bool
+}
+
 func NewSyncClient(host string, timeout time.Duration) (*SyncClient, error) {
 	s := &SyncClient{}
 
@@ -66,4 +71,34 @@ func (s *SyncClient) Round() (*SyncRound, error) {
 		Remote:  NanoSec(date.UnixNano()),
 		Receive: s.tRecv,
 	}, nil
+}
+
+func (s *SyncClient) Sync(model *SyncModel, trace *SyncTrace) error {
+	for {
+		if !trace.Before(model) {
+			break
+		}
+
+		// We wait until the next (estimated) best time to send a request which
+		// will reduce the error margin.
+		//
+		// I.e., we time our request based on the current model so that the
+		// server will reply in a "full" second (see README).
+		model.Sleep()
+
+		round, err := s.Round()
+		if err != nil {
+			return err
+		}
+
+		if err := model.Update(round); err != nil {
+			return err
+		}
+
+		if !trace.After(model, round) {
+			break
+		}
+	}
+
+	return nil
 }

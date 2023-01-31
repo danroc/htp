@@ -7,7 +7,7 @@ import (
 	"os/exec"
 )
 
-func syncSystem(model *SyncModel) error {
+func SyncSystem(model *SyncModel) error {
 	arg := fmt.Sprintf("Set-Date -Adjust $([TimeSpan]::FromSeconds(%+.3f))", -model.Offset().Sec())
 	return exec.Command("powershell", "-Command", arg).Run()
 }
