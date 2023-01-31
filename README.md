@@ -4,6 +4,10 @@ HTP uses time information present in HTTP headers to determine the clock offset
 between two machines. It can be used to synchronize the local clock using a
 trusted HTTP(S) server, or to determine the time of the remote machine.
 
+> **Note**: If NTP is available, use it instead. I developed this application
+> to be able to synchronize my computer's clock in a network that blocked NTP
+> packets.
+
 ## Installation
 
 Download the binary for your platform from the [releases page](https://github.com/danroc/htp/releases/latest).
