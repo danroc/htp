@@ -36,6 +36,11 @@ type SyncModel struct {
 	rtt   *ema.EMA[NanoSec]
 }
 
+// RTT returns the round-trip time of a SyncRound.
+func (r *SyncRound) RTT() NanoSec {
+	return r.Receive - r.Send
+}
+
 // NewSyncModel returns a new SyncModel.
 func NewSyncModel() *SyncModel {
 	return &SyncModel{
@@ -54,7 +59,7 @@ func (s *SyncModel) Update(round *SyncRound) error {
 		t2 = round.Receive
 	)
 
-	s.rtt.Update(t2 - t0)
+	s.rtt.Update(round.RTT())
 	s.lower = max(s.lower, t0-t1-second)
 	s.upper = min(s.upper, t2-t1)
 	s.count++
