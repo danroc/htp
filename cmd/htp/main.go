@@ -47,8 +47,12 @@ func buildRootCommand() *cobra.Command {
 				Before: func(model *htp.SyncModel) bool { return model.Count() < count },
 				After: func(model *htp.SyncModel, round *htp.SyncRound) bool {
 					logInfo(
-						silent, "(%d/%d) offset: %+.3f (±%.3f) seconds", model.Count(),
-						count, model.Offset().Sec(), model.Margin().Sec())
+						silent,
+						"(%d/%d) offset: %+.3f (±%.3f) seconds",
+						model.Count(), count,
+						model.Offset().Sec(),
+						model.Margin().Sec(),
+					)
 					return true
 				},
 			}
