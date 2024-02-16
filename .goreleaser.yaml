@@ -10,10 +10,7 @@ builds:
       - darwin
     main: ./cmd/htp/
 archives:
-  - replacements:
-      darwin: macos
-      386: x86
-    format_overrides:
+  - format_overrides:
       - goos: windows
         format: zip
     wrap_in_directory: htp
