@@ -30,7 +30,6 @@ type SyncRound struct {
 
 // SyncModel stores the state of the model used in a HTP synchronization.
 type SyncModel struct {
-	count int
 	lower NanoSec
 	upper NanoSec
 	rtt   *ema.EMA[NanoSec]
@@ -44,7 +43,6 @@ func (r *SyncRound) RTT() NanoSec {
 // NewSyncModel returns a new SyncModel.
 func NewSyncModel() *SyncModel {
 	return &SyncModel{
-		count: 0,
 		lower: math.MinInt64,
 		upper: math.MaxInt64,
 		rtt:   ema.NewDefaultEMA[NanoSec](samples),
@@ -62,7 +60,6 @@ func (s *SyncModel) Update(round *SyncRound) error {
 	s.rtt.Update(round.RTT())
 	s.lower = max(s.lower, t0-t1-second)
 	s.upper = min(s.upper, t2-t1)
-	s.count++
 
 	if s.lower > s.upper {
 		return errors.New("local or remote clock changed")
@@ -88,13 +85,13 @@ func (s *SyncModel) RTT() NanoSec {
 
 // Count returns the number of rounds used to update the model.
 func (s *SyncModel) Count() int {
-	return s.count
+	return s.rtt.Count()
 }
 
 // Delay returns the delay from now that we should wait before sending the next
 // HTTP request.
 func (s *SyncModel) Delay(now NanoSec) time.Duration {
-	if s.count == 0 {
+	if s.Count() == 0 {
 		return time.Duration(0)
 	}
 	return time.Duration(secMod(s.Offset() - s.RTT()/2 - now))
