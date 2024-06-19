@@ -1,4 +1,7 @@
-.PHONY: tidy update vendor run build
+.PHONY: lint tidy update vendor run build
+
+lint: tidy
+	golines -w -m 88 --base-formatter=gofumpt .
 
 tidy:
 	go mod tidy
