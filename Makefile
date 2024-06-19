@@ -1,9 +1,9 @@
-.PHONY: tidy dep-update vendor run build
+.PHONY: tidy update vendor run build
 
 tidy:
 	go mod tidy
 
-dep-update:
+update:
 	go get -u ./...
 
 vendor:
