@@ -7,7 +7,7 @@ toolchain go1.23.3
 require (
 	github.com/spf13/cobra v1.8.1
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f
-	golang.org/x/sys v0.27.0
+	golang.org/x/sys v0.28.0
 )
 
 require (
