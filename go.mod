@@ -2,7 +2,7 @@ module github.com/danroc/htp
 
 go 1.22.0
 
-toolchain go1.23.6
+toolchain go1.25.3
 
 require (
 	github.com/spf13/cobra v1.8.1
