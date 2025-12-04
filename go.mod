@@ -5,7 +5,7 @@ go 1.24.0
 toolchain go1.25.5
 
 require (
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	golang.org/x/exp v0.0.0-20251125195548-87e1e737ad39
 	golang.org/x/sys v0.38.0
 )
