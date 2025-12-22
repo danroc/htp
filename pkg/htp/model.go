@@ -109,22 +109,6 @@ func (s *SyncModel) Now() time.Time {
 	return time.Now().Add(time.Duration(-s.Offset()))
 }
 
-// min returns the minimum value between two NanoSec variables.
-func min(a, b NanoSec) NanoSec {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-// max returns the maximum value between two NanoSec variables.
-func max(a, b NanoSec) NanoSec {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 // secMod returns the number of nanoseconds past a round second value.
 func secMod(x NanoSec) NanoSec {
 	y := x % second
