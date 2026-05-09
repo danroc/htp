@@ -1,12 +1,12 @@
 module github.com/danroc/htp
 
-go 1.24.0
+go 1.25.0
 
 toolchain go1.26.2
 
 require (
 	github.com/spf13/cobra v1.10.2
-	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93
+	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a
 	golang.org/x/sys v0.40.0
 )
 
