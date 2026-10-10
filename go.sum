@@ -8,8 +8,8 @@ github.com/spf13/pflag v1.0.9/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An
 github.com/spf13/pflag v1.0.10 h1:4EBh2KAYBwaONj6b2Ye1GiHfwjqyROoF4RwYO+vPwFk=
 github.com/spf13/pflag v1.0.10/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
 go.yaml.in/yaml/v3 v3.0.4/go.mod h1:DhzuOOF2ATzADvBadXxruRBLzYTpT36CKvDb3+aBEFg=
-golang.org/x/exp v0.0.0-20261005173118-76772065c9b0 h1:qUp3i6M39kccSm3OMMIE3tvs7YQWO9rFeCKdk1sSaFk=
-golang.org/x/exp v0.0.0-20261005173118-76772065c9b0/go.mod h1:SRjTzy5WcYqRRqquLUvHeeovSwLO0CZ3xcltZNO4Fck=
+golang.org/x/exp v0.0.0-20261009195045-ca0d7ba23607 h1:o259es6R0mYtmCeID0xv+dkp5kQSf6qp8zs0j4MdUaI=
+golang.org/x/exp v0.0.0-20261009195045-ca0d7ba23607/go.mod h1:SRjTzy5WcYqRRqquLUvHeeovSwLO0CZ3xcltZNO4Fck=
 golang.org/x/sys v0.48.0 h1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=
 golang.org/x/sys v0.48.0/go.mod h1:hNLxWAXmnKAxqDtdwIYC4bM9oQPEecfsnNMuSxOs3og=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
